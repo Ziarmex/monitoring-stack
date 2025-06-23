@@ -1,0 +1,32 @@
+# Configuration Mosquitto MQTT Broker
+# Pour système de supervision industrielle
+
+# Listener principal
+listener 1883
+protocol mqtt
+
+# Listener WebSocket (pour debug web si nécessaire)
+listener 9001
+protocol websockets
+
+# Autoriser les connexions anonymes (pour développement)
+allow_anonymous true
+
+# Logs
+log_dest file /mosquitto/log/mosquitto.log
+log_dest stdout
+log_type error
+log_type warning
+log_type notice
+log_type information
+
+# Persistance des messages
+persistence true
+persistence_location /mosquitto/data/
+
+# QoS et retention
+max_queued_messages 1000
+message_size_limit 0
+
+# Connexions
+max_connections -1
