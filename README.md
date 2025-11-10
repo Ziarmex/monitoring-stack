@@ -1,8 +1,8 @@
-# 🏭 Mini Système de Supervision Industrielle
+# Mini Système de Supervision Industrielle
 
 Système complet de monitoring industriel avec collecte de données temps réel, traitement, stockage et visualisation.
 
-##  Architecture
+## Architecture
 
 ```
 Capteurs Simulés → MQTT (Mosquitto) → Node-RED → InfluxDB → Grafana
@@ -10,13 +10,13 @@ Capteurs Simulés → MQTT (Mosquitto) → Node-RED → InfluxDB → Grafana
 
 ### Composants
 
-- **Mosquitto** : Broker MQTT pour la communication entre capteurs
-- **Node-RED** : Traitement et routage des flux de données
-- **InfluxDB 2.x** : Base de données time-series
-- **Grafana** : Dashboards de visualisation
-- **Simulateur** : Script Node.js générant des données capteurs
+- Mosquitto : Broker MQTT pour la communication entre capteurs
+- Node-RED : Traitement et routage des flux de données
+- InfluxDB 2.x : Base de données time-series
+- Grafana : Dashboards de visualisation
+- Simulateur : Script Node.js générant des données capteurs
 
-##  Installation et Démarrage
+## Installation et Démarrage
 
 ### Prérequis
 
@@ -50,7 +50,7 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-**Temps de démarrage** : ~30 secondes
+Temps de démarrage : ~30 secondes
 
 ### Étape 4 : Configuration InfluxDB (première utilisation)
 
@@ -107,12 +107,12 @@ npm start
 
 ## Accès aux Services
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Grafana | http://localhost:3000 | admin / admin |
-| Node-RED | http://localhost:1880 | - |
-| InfluxDB | http://localhost:8086 | admin / adminpassword |
-| MQTT | mqtt://localhost:1883 | - |
+| Service   | URL                     | Credentials              |
+|-----------|-------------------------|--------------------------|
+| Grafana   | http://localhost:3000   | admin / admin            |
+| Node-RED  | http://localhost:1880   | -                        |
+| InfluxDB  | http://localhost:8086   | admin / adminpassword    |
+| MQTT      | mqtt://localhost:1883   | -                        |
 
 ## Fonctionnalités
 
@@ -120,17 +120,17 @@ npm start
 
 Le simulateur génère 3 types de données :
 
-1. **Température** (sensor_temp_01)
+1. Température (sensor_temp_01)
    - Plage : 15-80°C
    - Seuil alerte : 50°C
    - Fréquence : toutes les 5s
 
-2. **Pression** (sensor_pressure_01)
+2. Pression (sensor_pressure_01)
    - Plage : 0.5-10 bar
    - Seuil alerte : 8 bar
    - Fréquence : toutes les 7s
 
-3. **Humidité** (sensor_humidity_01)
+3. Humidité (sensor_humidity_01)
    - Plage : 20-95%
    - Seuil alerte : 80%
    - Fréquence : toutes les 6s
@@ -306,7 +306,7 @@ monitoring-stack/
 # Arrêter les services
 docker-compose down
 
-# Arrêter et supprimer les volumes (⚠️ perte de données)
+# Arrêter et supprimer les volumes (perte de données)
 docker-compose down -v
 
 # Arrêter le simulateur
@@ -362,4 +362,4 @@ Pour toute question ou problème :
 
 ---
 
-**Développé pour un environnement de démonstration et d'apprentissage**
+Développé pour un environnement de démonstration et d'apprentissage
