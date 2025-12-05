@@ -16,8 +16,8 @@
     "datatype": "json",
     "broker": "mqtt_broker",
     "x": 120,
-    "y": 100,
-    "wires": [["parse_json"]]
+    "y": 260,
+    "wires": [["validate_data"]]
   },
   {
     "id": "mqtt_in_pressure",
@@ -30,7 +30,7 @@
     "broker": "mqtt_broker",
     "x": 120,
     "y": 180,
-    "wires": [["parse_json"]]
+    "wires": [["validate_data"]]
   },
   {
     "id": "mqtt_in_humidity",
@@ -43,17 +43,6 @@
     "broker": "mqtt_broker",
     "x": 120,
     "y": 260,
-    "wires": [["parse_json"]]
-  },
-  {
-    "id": "parse_json",
-    "type": "json",
-    "z": "main_flow",
-    "name": "Parse JSON",
-    "property": "payload",
-    "action": "",
-    "x": 320,
-    "y": 180,
     "wires": [["validate_data"]]
   },
   {
@@ -61,12 +50,12 @@
     "type": "function",
     "z": "main_flow",
     "name": "Validate & Transform",
-    "func": "// Validation des données\nif (!msg.payload || !msg.payload.value || !msg.payload.type) {\n    node.warn('Données invalides reçues');\n    return null;\n}\n\n// Transformation pour InfluxDB\nconst data = msg.payload;\n\nmsg.payload = {\n    measurement: data.type,\n    fields: {\n        value: parseFloat(data.value),\n        alert: data.alert ? 1 : 0\n    },\n    tags: {\n        sensor_id: data.sensor_id,\n        unit: data.unit\n    },\n    timestamp: new Date(data.timestamp).getTime() * 1000000\n};\n\n// Stocker les données originales pour les alertes\nmsg.original = data;\n\nreturn msg;",
+    "func": "const data = msg.payload;\n\nif (!data || data.value === undefined || !data.type) {\n    node.warn('Données invalides reçues');\n    return null;\n}\n\nmsg.original = data;\n\nconst value = parseFloat(data.value);\nconst timestamp = new Date(data.timestamp).getTime() * 1000000;\n\nmsg.url = 'http://influxdb:8086/api/v2/write?org=industrial&bucket=sensors';\nmsg.headers = { 'Authorization': 'Token my-super-secret-auth-token' };\nmsg.payload = `${data.type},sensor_id=${data.sensor_id},unit=${data.unit} value=${value},alert=${data.alert ? 1 : 0} ${timestamp}`;\n\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
     "x": 530,
     "y": 180,
-    "wires": [["check_alert", "influx_out"]]
+    "wires": [["influxdb_write", "check_alert"]]
   },
   {
     "id": "check_alert",
@@ -130,15 +119,17 @@
     "wires": []
   },
   {
-    "id": "influx_out",
-    "type": "influxdb out",
+    "id": "influxdb_write",
+    "type": "http request",
     "z": "main_flow",
-    "influxdb": "influxdb_config",
     "name": "Write to InfluxDB",
-    "measurement": "",
-    "precision": "ns",
-    "retentionPolicy": "",
-    "x": 790,
+    "method": "POST",
+    "ret": "txt",
+    "url": "",
+    "tls": "",
+    "proxy": "",
+    "authType": "",
+    "x": 750,
     "y": 180,
     "wires": []
   },
@@ -183,20 +174,5 @@
     "willMsg": {},
     "userProps": "",
     "sessionExpiry": ""
-  },
-  {
-    "id": "influxdb_config",
-    "type": "influxdb",
-    "hostname": "influxdb",
-    "port": "8086",
-    "protocol": "http",
-    "database": "sensors",
-    "name": "InfluxDB",
-    "usetls": false,
-    "tls": "",
-    "influxdbVersion": "2.0",
-    "url": "http://influxdb:8086",
-    "timeout": "10",
-    "rejectUnauthorized": true
   }
 ]
