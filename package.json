@@ -2,10 +2,10 @@
   "name": "monitoring-stack-sensors",
   "version": "1.0.0",
   "description": "Simulateur de capteurs industriels pour système de monitoring",
-  "main": "simulate-sensors.js",
+  "main": "simulator/sensor_simulator.js",
   "scripts": {
-    "start": "node simulate-sensors.js",
-    "test": "node test-mqtt.js"
+    "start": "node simulator/sensor_simulator.js",
+    "test": "node test/test-mqtt.js"
   },
   "keywords": [
     "mqtt",
