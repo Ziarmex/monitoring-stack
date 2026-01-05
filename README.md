@@ -25,77 +25,21 @@ Capteurs Simulés → MQTT (Mosquitto) → Node-RED → InfluxDB → Grafana
 - Node.js >= 16.x (pour le simulateur)
 - 4GB RAM minimum
 
-### Étape 1 : Créer la structure des dossiers
+### Étape 1 : Lancer le stack Docker
 
 ```bash
-mkdir -p monitoring-stack
-cd monitoring-stack
-
-# Créer la structure
-mkdir -p mosquitto/{config,data,log}
-mkdir -p grafana/provisioning/{datasources,dashboards}
-```
-
-### Étape 2 : Fichiers de configuration
-
-Créer le fichier `mosquitto/config/mosquitto.conf` avec le contenu fourni.
-
-### Étape 3 : Lancer le stack Docker
-
-```bash
-# Lancer tous les services
-docker-compose up -d
+# Lancer tous les services (build inclut l'image Node-RED custom)
+docker compose up -d --build
 
 # Vérifier les logs
-docker-compose logs -f
+docker compose logs -f
 ```
 
 Temps de démarrage : ~30 secondes
 
-### Étape 4 : Configuration InfluxDB (première utilisation)
+> **Auto-configuration** : InfluxDB, le flow Node-RED, la datasource Grafana et le dashboard sont automatiquement provisionnés. Aucune configuration manuelle nécessaire.
 
-1. Accéder à http://localhost:8086
-2. Les credentials sont déjà configurés :
-   - Username: `admin`
-   - Password: `adminpassword`
-   - Organization: `industrial`
-   - Bucket: `sensors`
-3. Récupérer le token API dans Settings → Tokens
-
-### Étape 5 : Configuration Node-RED
-
-1. Accéder à http://localhost:1880
-2. Installer les nœuds nécessaires via Menu → Manage palette :
-   - `node-red-contrib-influxdb`
-3. Importer le flow :
-   - Menu → Import → Coller le contenu de `node-red-flows.json`
-4. Configurer le nœud InfluxDB :
-   - Double-cliquer sur "Write to InfluxDB"
-   - Éditer "InfluxDB Config"
-   - Coller le token récupéré à l'étape 4
-   - Organization: `industrial`
-   - Bucket: `sensors`
-5. Déployer : Bouton "Deploy" en haut à droite
-
-### Étape 6 : Configuration Grafana
-
-1. Accéder à http://localhost:3000
-2. Login :
-   - Username: `admin`
-   - Password: `admin`
-3. Ajouter la source de données InfluxDB :
-   - Configuration → Data Sources → Add data source → InfluxDB
-   - Query Language: **Flux**
-   - URL: `http://influxdb:8086`
-   - Organization: `industrial`
-   - Token: (coller le token InfluxDB)
-   - Default Bucket: `sensors`
-   - Sauvegarder et tester
-4. Importer le dashboard :
-   - Dashboards → Import → Upload JSON file
-   - Sélectionner `grafana-dashboard.json`
-
-### Étape 7 : Lancer le simulateur de capteurs
+### Étape 2 : Lancer le simulateur de capteurs
 
 ```bash
 # Installer les dépendances
@@ -107,7 +51,7 @@ npm start
 
 ## Accès aux Services
 
-| Service   | URL                     | Credentials              |
+| Service   | URL                     | Identifiants             |
 |-----------|-------------------------|--------------------------|
 | Grafana   | http://localhost:3000   | admin / admin            |
 | Node-RED  | http://localhost:1880   | -                        |
@@ -170,7 +114,7 @@ mosquitto_sub -h localhost -t "sensors/#" -v
 ### Test 2 : Données dans InfluxDB
 
 1. Accéder à http://localhost:8086
-2. Data Explorer
+2. Explorateur de données
 3. Requête :
 ```flux
 from(bucket: "sensors")
@@ -200,10 +144,10 @@ docker stats
 
 ```bash
 # Vérifier que Mosquitto est démarré
-docker-compose ps mosquitto
+docker compose ps mosquitto
 
 # Vérifier les logs
-docker-compose logs mosquitto
+docker compose logs mosquitto
 
 # Tester la connexion
 telnet localhost 1883
@@ -219,13 +163,13 @@ telnet localhost 1883
 
 1. Vérifier le token dans Node-RED
 2. Tester la connexion InfluxDB dans Node-RED
-3. Vérifier les logs : `docker-compose logs influxdb`
+3. Vérifier les logs : `docker compose logs influxdb`
 
 ### Grafana n'affiche pas les données
 
 1. Vérifier la source de données (Test & Save)
 2. Examiner les requêtes dans le dashboard (mode Edit)
-3. Vérifier les logs : `docker-compose logs grafana`
+3. Vérifier les logs : `docker compose logs grafana`
 
 ## Performances
 
@@ -246,7 +190,7 @@ telnet localhost 1883
 
 ### Ajouter des capteurs
 
-Modifier `simulate-sensors.js` :
+Modifier `simulator/sensor_simulator.js` :
 
 ```javascript
 {
@@ -266,7 +210,7 @@ Modifier `simulate-sensors.js` :
 Dans l'interface InfluxDB :
 1. Data → Buckets
 2. Éditer le bucket "sensors"
-3. Changer la retention policy
+3. Changer la politique de rétention
 
 ### Activer l'authentification MQTT
 
@@ -289,25 +233,37 @@ docker exec mosquitto mosquitto_passwd -c /mosquitto/config/passwd username
 monitoring-stack/
 ├── docker-compose.yml          # Configuration Docker
 ├── package.json                # Dépendances Node.js
-├── simulate-sensors.js         # Simulateur de capteurs
-├── node-red-flows.json        # Flows Node-RED
-├── grafana-dashboard.json     # Dashboard Grafana
-├── README.md                  # Documentation
-└── mosquitto/
-    ├── config/
-    │   └── mosquitto.conf     # Config MQTT
-    ├── data/                  # Données persistées
-    └── log/                   # Logs Mosquitto
+├── simulator/
+│   └── sensor_simulator.js     # Simulateur de capteurs
+├── node-red/
+│   ├── Dockerfile             # Image Node-RED custom
+│   └── nodered_flows.json     # Flows Node-RED
+├── grafana/
+│   ├── provisioning/
+│   │   └── datasources/
+│   │       └── influxdb.yml   # Datasource auto-config
+│   └── dashboards/
+│       └── grafana_dashboard.json  # Dashboard Grafana
+├── test/
+│   └── test-mqtt.js           # Test MQTT
+├── mosquitto/
+│   ├── config/
+│   │   └── mosquitto.conf     # Config MQTT
+│   ├── data/                  # Données persistées
+│   └── log/                   # Logs Mosquitto
+├── docs/
+│   └── Architecture.md        # Documentation architecture
+└── README.md                  # Documentation
 ```
 
 ## Arrêt et Nettoyage
 
 ```bash
 # Arrêter les services
-docker-compose down
+docker compose down
 
 # Arrêter et supprimer les volumes (perte de données)
-docker-compose down -v
+docker compose down -v
 
 # Arrêter le simulateur
 Ctrl+C dans le terminal
@@ -330,10 +286,10 @@ docker exec grafana grafana-cli admin export-dashboard > dashboards-backup.json
 
 ```bash
 # Mettre à jour les images
-docker-compose pull
+docker compose pull
 
 # Redémarrer les services
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Améliorations Possibles
@@ -356,7 +312,7 @@ docker-compose up -d
 ## Support
 
 Pour toute question ou problème :
-1. Vérifier les logs : `docker-compose logs`
+1. Vérifier les logs : `docker compose logs`
 2. Consulter la section Dépannage
 3. Vérifier la configuration des services
 

@@ -1,10 +1,9 @@
 # Configuration Node-RED
 
-## Import du Flow
-1. Accéder à http://localhost:1880
-2. Menu → Import → Sélectionner `flows.json`
-3. Configurer le token InfluxDB
-4. Déployer
+Le flow est automatiquement déployé au démarrage du conteneur.
+Aucune configuration manuelle n'est nécessaire.
 
-## Nœuds requis
-- node-red-contrib-influxdb
+## Modification du Flow
+1. Accéder à http://localhost:1880
+2. Modifier les nœuds si nécessaire
+3. Déployer : Bouton "Deploy" en haut à droite

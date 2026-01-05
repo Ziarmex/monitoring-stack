@@ -39,10 +39,10 @@ info "✓ Docker installé: $(docker --version)"
 
 # Vérification de Docker Compose
 info "Vérification de Docker Compose..."
-if ! command -v docker-compose &> /dev/null; then
+if ! docker compose version &> /dev/null; then
     error "Docker Compose n'est pas installé."
 fi
-info "✓ Docker Compose installé: $(docker-compose --version)"
+info "✓ Docker Compose installé: $(docker compose version)"
 
 # Vérification de Node.js
 info "Vérification de Node.js..."
@@ -97,7 +97,7 @@ info "✓ Permissions configurées"
 
 # Lancement des services Docker
 info "Lancement des services Docker (cela peut prendre quelques minutes)..."
-docker-compose up -d
+docker compose up -d --build
 
 # Attendre que les services démarrent
 info "Attente du démarrage des services..."
@@ -107,7 +107,7 @@ sleep 30
 info "Vérification des services..."
 services=("mosquitto" "influxdb" "nodered" "grafana")
 for service in "${services[@]}"; do
-    if docker-compose ps | grep -q "$service.*Up"; then
+    if docker compose ps | grep -q "$service.*Up"; then
         info "✓ $service est démarré"
     else
         error "$service n'a pas démarré correctement"
@@ -133,11 +133,9 @@ echo "   • InfluxDB:  http://localhost:8086 (admin/adminpassword)"
 echo "   • MQTT:      mqtt://localhost:1883"
 echo ""
 echo "🚀 Prochaines étapes:"
-echo "   1. Configurer InfluxDB: http://localhost:8086"
-echo "   2. Importer le flow Node-RED depuis node-red-flows.json"
-echo "   3. Configurer le token InfluxDB dans Node-RED"
-echo "   4. Importer le dashboard Grafana depuis grafana-dashboard.json"
-echo "   5. Lancer le simulateur: npm start"
+echo "   1. Lancer le simulateur: npm start"
+echo "   2. Accéder à Grafana: http://localhost:3000 (admin/admin)"
+echo "   3. Dashboard 'Supervision Industrielle' déjà pré-configuré"
 echo ""
 echo "📖 Consultez le README.md pour plus de détails"
 echo ""
